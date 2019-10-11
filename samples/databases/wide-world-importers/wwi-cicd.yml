@@ -48,8 +48,7 @@ stages:
     - task: SSISBuild@0
       displayName: 'Build wwi-ssis'
       inputs:
-        projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis.sln'
-        configuration: 'Development'
+        projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
