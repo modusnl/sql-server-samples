@@ -1,0 +1,71 @@
+# author: Paul Mooij
+# date: 2019-06-14
+# purpose: Build and Release template as Code for Database Project
+# usage: copy this template; change variables & trigger; create Azure DevOps Pipeline; select this .yml file; rename Pipeline properly.
+
+# using standard name pattern
+name: $(Build.DefinitionName)_$(Date:yyyyMMdd).$(Rev:r)
+
+# local template variables
+variables:
+ ProjectPath: 'samples/databases/wide-world-importers/wwi-sample.sln'
+
+# filter trigger down to specific solution folder
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - samples/databases/wide-world-importers/*
+
+stages:
+
+# Build
+- stage: Build
+  jobs:
+  - job: VSBuild
+    displayName: Visual Studio Build
+    pool:
+      name: Hosted Windows 2019 with VS2019
+
+    steps:
+    - task: VSBuild@1
+      displayName: 'Build $(ProjectPath)'
+      inputs:
+        solution: '$(ProjectPath)'
+        platform: 'any cpu'
+        configuration: 'release'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: '**\bin\**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'      
+        flattenFolders: true
+  
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+
+# Deploy - Dev
+- stage: Deploy-Dev
+  dependsOn: Build
+  jobs:
+  - deployment: VSDeploy
+    displayName: Visual Studio Deploy
+    environment: Dev
+    pool:
+      name: Hosted Windows 2019 with VS2019
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              downloadType: 'single'
+              downloadPath: '$(System.ArtifactsDirectory)'      
