@@ -20,8 +20,6 @@ trigger:
     - samples/databases/wide-world-importers/*
 
 stages:
-
-# Build
 - stage: Build
   jobs:
   - job: VSBuild
@@ -50,8 +48,7 @@ stages:
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
-# Deploy - Dev
-- stage: Deploy-Dev
+- stage: DeployDev
   dependsOn: Build
   jobs:
   - deployment: VSDeploy
