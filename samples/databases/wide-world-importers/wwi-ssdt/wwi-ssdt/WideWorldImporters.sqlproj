@@ -351,7 +351,6 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="Storage\USERDATA.sql" />
-    <Build Include="Storage\WWI_MemoryOptimized_Data.sql" />
     <Build Include="Security\External Sales.sql" />
     <Build Include="Security\Far West Sales.sql" />
     <Build Include="Security\Great Lakes Sales.sql" />
@@ -789,12 +788,13 @@
     <Build Include="WebApi\Views\TransactionTypes.sql" />
     <Build Include="WebApi\Views\DeliveryMethods.sql" />
     <Build Include="WebApi\Views\PaymentMethods.sql" />
+    <Build Include="Storage\WWI_MemoryOptimized_Data.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="PostDeploymentScripts\Script.PostDeployment1.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="WideWorldImporters.xml" />
+    <None Include="WideWorldImporters.publish.xml" />
     <None Include="PostDeploymentScripts\pds100-ins-app-people.sql" />
     <None Include="PostDeploymentScripts\pds110-ins-app-countries.sql" />
     <None Include="PostDeploymentScripts\pds120-ins-app-deliverymethods.sql" />
@@ -845,5 +845,13 @@
     <None Include="PostDeploymentScripts\pds106-ins-dls-areacode.sql" />
     <None Include="PostDeploymentScripts\pds400-ins-unkown-orderline.sql" />
     <None Include="PostDeploymentScripts\pds410-update-archive-tables.sql" />
+    <None Include="LocalMachine.scmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
 </Project>
