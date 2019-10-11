@@ -2,6 +2,7 @@
 # date: 2019-06-14
 # purpose: Build and Release template as Code for Database Project
 # usage: copy this template; change variables & trigger; create Azure DevOps Pipeline; select this .yml file; rename Pipeline properly.
+# hosted agent capabilities: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
 
 # using standard name pattern
 name: $(Build.DefinitionName)_$(Date:yyyyMMdd).$(Rev:r)
@@ -27,7 +28,7 @@ stages:
   - job: VSBuild
     displayName: Visual Studio Build
     pool:
-      name: Hosted Windows 2019 with VS2019
+      vmImage: 'windows-2019'
 
     steps:
     - task: VSBuild@1
@@ -48,7 +49,7 @@ stages:
       displayName: 'Build wwi-ssis'
       inputs:
         projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis.sln'
-        configuration: 'development'
+        configuration: 'Development'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
