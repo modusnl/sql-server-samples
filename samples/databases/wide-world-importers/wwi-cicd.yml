@@ -9,6 +9,7 @@ name: $(Build.DefinitionName)_$(Date:yyyyMMdd).$(Rev:r)
 # local template variables
 variables:
  ProjectPath: 'samples/databases/wide-world-importers/wwi-sample.sln'
+ BuildConfiguration: 'release'
 
 # filter trigger down to specific solution folder
 trigger:
@@ -18,6 +19,7 @@ trigger:
   paths:
     include:
     - samples/databases/wide-world-importers/*
+
 
 stages:
 - stage: Build
@@ -29,11 +31,24 @@ stages:
 
     steps:
     - task: VSBuild@1
-      displayName: 'Build $(ProjectPath)'
+      displayName: 'Build wwi-ssdt'
       inputs:
-        solution: '$(ProjectPath)'
+        solution: 'samples/databases/wide-world-importers/wwi-ssdt/WideWorldImporters.sln'
         platform: 'any cpu'
-        configuration: 'release'
+        configuration: '$(BuildConfiguration)'
+
+    - task: VSBuild@1
+      displayName: 'Build wwi-dw-ssdt'
+      inputs:
+        solution: 'samples/databases/wide-world-importers/wwi-dw-ssdt/WideWorldImportersDW.sln'
+        platform: 'any cpu'
+        configuration: '$(BuildConfiguration)'
+
+    - task: SSISBuild@0
+      displayName: 'Build wwi-ssis'
+      inputs:
+        projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis.sln'
+        configuration: '$(BuildConfiguration)'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
@@ -47,6 +62,7 @@ stages:
       displayName: 'Publish Artifact: drop'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+
 
 - stage: DeployDev
   dependsOn: Build
@@ -65,4 +81,4 @@ stages:
               buildType: 'current'
               artifactName: 'drop'
               downloadType: 'single'
-              downloadPath: '$(System.ArtifactsDirectory)'      
+              downloadPath: '$(System.ArtifactsDirectory)'
