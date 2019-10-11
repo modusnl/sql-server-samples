@@ -31,24 +31,24 @@ stages:
       vmImage: 'windows-2019'
 
     steps:
-    - task: VSBuild@1
-      displayName: 'Build wwi-ssdt'
-      inputs:
-        solution: 'samples/databases/wide-world-importers/wwi-ssdt/WideWorldImporters.sln'
-        platform: 'any cpu'
-        configuration: '$(BuildConfiguration)'
+#    - task: VSBuild@1
+#      displayName: 'Build wwi-ssdt'
+#      inputs:
+#        solution: 'samples/databases/wide-world-importers/wwi-ssdt/WideWorldImporters.sln'
+#        platform: 'any cpu'
+#        configuration: '$(BuildConfiguration)'
 
     - task: VSBuild@1
       displayName: 'Build wwi-dw-ssdt'
       inputs:
-        solution: 'samples/databases/wide-world-importers/wwi-dw-ssdt/WideWorldImportersDW.sln'
+        solution: 'samples/databases/wide-world-importers/**.sqlproj'
         platform: 'any cpu'
         configuration: '$(BuildConfiguration)'
 
     - task: SSISBuild@0
       displayName: 'Build wwi-ssis'
       inputs:
-        projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis'
+        projectPath: 'samples/databases/wide-world-importers/**.dtproj'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
