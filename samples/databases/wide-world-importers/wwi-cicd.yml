@@ -32,24 +32,40 @@ stages:
 
     steps:
     - task: VSBuild@1
-      displayName: 'Build wwi-sql projects'
+      displayName: 'Build SQL projects'
       inputs:
         solution: 'samples/databases/wide-world-importers/**.sqlproj'
         platform: 'any cpu'
         configuration: '$(BuildConfiguration)'
 
     - task: SSISBuild@0
-      displayName: 'Build wwi-ssis project'
+      displayName: 'Build SSIS project'
       inputs:
         projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis'
+
+    steps:
+    - task: VSBuild@1
+      displayName: 'Build SSAS projects'
+      inputs:
+        solution: 'samples/databases/wide-world-importers/**.dwproj'
+        platform: 'any cpu'
+        configuration: '$(BuildConfiguration)'
+
+    steps:
+    - task: VSBuild@1
+      displayName: 'Build .NET projects'
+      inputs:
+        solution: 'samples/databases/wide-world-importers/**.csproj'
+        platform: 'any cpu'
+        configuration: '$(BuildConfiguration)'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)'
         Contents: '**\bin\**'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'      
-        flattenFolders: true
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        flattenFolders: false
   
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
