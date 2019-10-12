@@ -53,7 +53,7 @@ stages:
     - task: VSBuild@1
       displayName: 'Build .NET projects'
       inputs:
-        solution: 'samples/databases/wide-world-importers/**.csproj'
+        solution: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
         platform: 'any cpu'
         configuration: '$(BuildConfiguration)'
 
