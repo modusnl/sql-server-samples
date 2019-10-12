@@ -43,7 +43,6 @@ stages:
       inputs:
         projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis'
 
-    steps:
     - task: VSBuild@1
       displayName: 'Build SSAS projects'
       inputs:
@@ -51,7 +50,6 @@ stages:
         platform: 'any cpu'
         configuration: '$(BuildConfiguration)'
 
-    steps:
     - task: VSBuild@1
       displayName: 'Build .NET projects'
       inputs:
