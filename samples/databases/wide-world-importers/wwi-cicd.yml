@@ -31,6 +31,18 @@ stages:
       vmImage: 'vs2017-win2016'
 
     steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore .NET projects'
+      inputs:
+        command: restore
+        projects: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
+    
+    - task: DotNetCoreCLI@2
+      displayName: 'Build .NET projects'
+      inputs:
+        projects: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
+        arguments: '--configuration $(BuildConfiguration)'
+        
     - task: VSBuild@1
       displayName: 'Build SQL projects'
       inputs:
@@ -49,15 +61,6 @@ stages:
 #        solution: 'samples/databases/wide-world-importers/**.dwproj'
 #        platform: 'any cpu'
 #        configuration: '$(BuildConfiguration)'
-
-    - task: VSBuild@1
-      displayName: 'Build .NET projects'
-      inputs:
-        solution: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
-        platform: 'any cpu'
-        configuration: '$(BuildConfiguration)'
-        maximumCpuCount: true
-        restoreNugetPackages: true
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
