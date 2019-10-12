@@ -2,6 +2,7 @@
 # date: 2019-06-14
 # purpose: Build and Release template as Code for Database Project
 # usage: copy this template; change variables & trigger; create Azure DevOps Pipeline; select this .yml file; rename Pipeline properly.
+# hosted agent capabilities: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
 
 # using standard name pattern
 name: $(Build.DefinitionName)_$(Date:yyyyMMdd).$(Rev:r)
@@ -9,6 +10,7 @@ name: $(Build.DefinitionName)_$(Date:yyyyMMdd).$(Rev:r)
 # local template variables
 variables:
  ProjectPath: 'samples/databases/wide-world-importers/wwi-sample.sln'
+ BuildConfiguration: 'release'
 
 # filter trigger down to specific solution folder
 trigger:
@@ -19,39 +21,71 @@ trigger:
     include:
     - samples/databases/wide-world-importers/*
 
-stages:
 
-# Build
+stages:
 - stage: Build
   jobs:
   - job: VSBuild
     displayName: Visual Studio Build
     pool:
-      name: Hosted Windows 2019 with VS2019
+      vmImage: 'vs2017-win2016'
 
     steps:
-    - task: VSBuild@1
-      displayName: 'Build $(ProjectPath)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore .NET projects'
       inputs:
-        solution: '$(ProjectPath)'
+        command: restore
+        projects: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
+    
+    - task: DotNetCoreCLI@2
+      displayName: 'Build .NET projects'
+      inputs:
+        projects: 'samples/databases/wide-world-importers/wwi-*/**.csproj'
+        arguments: '--configuration $(BuildConfiguration)'
+        
+    - task: VSBuild@1
+      displayName: 'Build SQL projects'
+      inputs:
+        solution: 'samples/databases/wide-world-importers/**.sqlproj'
         platform: 'any cpu'
-        configuration: 'release'
+        configuration: '$(BuildConfiguration)'
+
+    - task: SSISBuild@0
+      displayName: 'Build SSIS project'
+      inputs:
+        projectPath: 'samples/databases/wide-world-importers/wwi-ssis/wwi-ssis'
+
+#    - task: VSBuild@1
+#      displayName: 'Build SSAS projects'
+#      inputs:
+#        solution: 'samples/databases/wide-world-importers/**.dwproj'
+#        platform: 'any cpu'
+#        configuration: '$(BuildConfiguration)'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)'
         Contents: '**\bin\**'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'      
-        flattenFolders: true
-  
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        flattenFolders: false
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).zip'
+        replaceExistingArchive: true
+        verbose: true
+
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.DefinitionName).zip'
 
-# Deploy - Dev
-- stage: Deploy-Dev
+
+- stage: DeployDev
   dependsOn: Build
   jobs:
   - deployment: VSDeploy
@@ -68,4 +102,4 @@ stages:
               buildType: 'current'
               artifactName: 'drop'
               downloadType: 'single'
-              downloadPath: '$(System.ArtifactsDirectory)'      
+              downloadPath: '$(System.ArtifactsDirectory)'
